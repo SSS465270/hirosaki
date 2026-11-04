@@ -21,14 +21,14 @@
             <form id="loginForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium mb-1">ユーザー名 / ID</label>
-                    <input type="text" id="loginId" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="例: Yamada または Admin">
+                    <input type="text" id="loginId" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="">
                 </div>
                 <button type="submit" id="loginBtn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-medium hover:bg-indigo-700 transition shadow-sm">
                     1つ目のコードを送信する
                 </button>
             </form>
             <div class="text-center text-xs text-slate-400">
-                ※ntfyの順次2段階認証で安全にアクセスします。
+                
             </div>
         </div>
     </div>
@@ -39,16 +39,16 @@
             <div class="text-center space-y-2">
                 <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full">Step 2 / 3: 第1段階認証</span>
                 <h2 class="text-2xl font-bold text-slate-800">1つ目のコード確認</h2>
-                <p class="text-sm text-slate-500">トピック1（climin-notice-login）に届いた4桁コードを入力してください。</p>
+                <p class="text-sm text-slate-500">届いたコードを入力してください。</p>
             </div>
 
             <div class="space-y-4">
                 <div class="p-3 bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs rounded-lg text-center font-medium">
-                    ✓ トピック1へコードを送信しました。
+                    ✓ コードを送信しました。
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">4桁の確認コード (1)</label>
-                    <input type="text" id="auth1CodeInput" maxlength="4" class="w-full text-center text-2xl tracking-widest px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold" placeholder="----">
+                    <label class="block text-sm font-medium mb-1">確認コード (1)</label>
+                    <input type="text" id="auth1CodeInput" maxlength="4" class="w-full text-center text-2xl tracking-widest px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold" placeholder="">
                 </div>
                 <button type="button" onclick="verifyAuth1()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-medium hover:bg-indigo-700 transition shadow-sm">
                     次へ（2つ目の認証へ進む）
@@ -63,16 +63,16 @@
             <div class="text-center space-y-2">
                 <span class="text-xs bg-emerald-100 text-emerald-700 font-bold px-3 py-1 rounded-full">Step 3 / 3: 第2段階認証</span>
                 <h2 class="text-2xl font-bold text-slate-800">2つ目のコード確認</h2>
-                <p class="text-sm text-slate-500">トピック2（notice-climin-loginin）に届いた4桁コードを入力してください。</p>
+                <p class="text-sm text-slate-500">届いたコードを入力してください。</p>
             </div>
 
             <div class="space-y-4">
                 <div class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-lg text-center font-medium">
-                    ✓ トピック2へコードを送信しました。
+                    ✓ コードを送信しました。
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">4桁の確認コード (2)</label>
-                    <input type="text" id="auth2CodeInput" maxlength="4" class="w-full text-center text-2xl tracking-widest px-3 py-2 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-bold" placeholder="----">
+                    <label class="block text-sm font-medium mb-1">確認コード (2)</label>
+                    <input type="text" id="auth2CodeInput" maxlength="4" class="w-full text-center text-2xl tracking-widest px-3 py-2 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-bold" placeholder="">
                 </div>
                 <button type="button" onclick="verifyAuth2()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-medium hover:bg-emerald-700 transition shadow-sm">
                     認証を完了してアプリに入る
@@ -210,13 +210,13 @@
         let customers = [];
         let currentServiceId = null;
 
-        // 【Step 1】 ユーザー名入力 ➡️ 1つ目のトピックへコード送信
+        // 【Step 1】 ユーザー名入力 ➡️ 1つ目へコード送信
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             currentLoginUser = document.getElementById('loginId').value.trim();
             const btn = document.getElementById('loginBtn');
 
-            btn.textContent = "トピック1へ送信中...";
+            btn.textContent = "送信中...";
             btn.disabled = true;
 
             code1 = Math.floor(1000 + Math.random() * 9000).toString();
@@ -235,7 +235,7 @@
             btn.disabled = false;
         });
 
-        // 【Step 2】 1つ目のコード検証 ➡️ 2つ目のトピックへ送信
+        // 【Step 2】 1つ目のコード検証 ➡️ 2つ目へ送信
         window.verifyAuth1 = async function() {
             const inputVal = document.getElementById('auth1CodeInput').value.trim();
             if (inputVal === code1 && code1 !== "") {
