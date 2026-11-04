@@ -6,8 +6,6 @@
     <title>Climin - 顧客管理アプリ</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- ★ 設定ファイル（相対パス）を追加 -->
-    <script src="./config.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
@@ -215,14 +213,21 @@
         &copy; 2026 Climin / Developed for Yamazaki Sora
     </footer>
 
-    <!-- Firebase SDK & config.js インポート -->
+    <!-- Firebase SDK & 埋め込み設定 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, updatePassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         
-        // ★ config.js から設定をインポート
-        import { firebaseConfig } from "./config.js";
+        // ★ Firebase設定を直接埋め込み（404エラーを完全に防止）
+        const firebaseConfig = {
+          apiKey: "AIzaSy... (あなたのAPIキー)",
+          authDomain: "climin-bf45a.firebaseapp.com",
+          projectId: "climin-bf45a",
+          storageBucket: "climin-bf45a.appspot.com",
+          messagingSenderId: "あなたのSENDER_ID",
+          appId: "あなたのAPP_ID"
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
