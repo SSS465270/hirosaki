@@ -9,62 +9,73 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <!-- 1. ID・パスワード認証画面（1段階目） -->
+    <!-- 1. ログイン画面（Step 1: ユーザー名入力 ＆ 1つ目のntfy送信） -->
     <div id="loginView" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl space-y-6">
             <div class="text-center space-y-2">
-                <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full">Step 1 / 2</span>
+                <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full">Step 1 / 3: ユーザー確認</span>
                 <h2 class="text-2xl font-bold text-slate-800">Climin ログイン</h2>
-                <p class="text-sm text-slate-500">ユーザーIDとパスワードを入力してください。</p>
+                <p class="text-sm text-slate-500">管理者名を入力してください。</p>
             </div>
 
             <form id="loginForm" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1">ユーザーID</label>
-                    <input type="text" id="loginId" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="例: abc123">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">パスワード</label>
-                    <input type="password" id="loginPw" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="••••••••">
+                    <label class="block text-sm font-medium mb-1">ユーザー名 / ID</label>
+                    <input type="text" id="loginId" required class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="例: Yamada または Admin">
                 </div>
                 <button type="submit" id="loginBtn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-medium hover:bg-indigo-700 transition shadow-sm">
-                    ログインして2段階認証へ
+                    1つ目のコードを送信する
                 </button>
             </form>
             <div class="text-center text-xs text-slate-400">
-                ※Firebase Authに登録したID（例: <code class="bg-slate-100 px-1 rounded">abc123@climin.local</code>）とパスワードを使用します。
+                ※ntfyの順次2段階認証で安全にアクセスします。
             </div>
         </div>
     </div>
 
-    <!-- 2. ntfy 2段階認証画面（2段階目） -->
-    <div id="authView" class="fixed inset-0 bg-slate-900 z-50 hidden items-center justify-center p-4">
+    <!-- 2. 第1段階認証コード入力画面 -->
+    <div id="auth1View" class="fixed inset-0 bg-slate-900 z-50 hidden items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl space-y-6">
             <div class="text-center space-y-2">
-                <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full">Step 2 / 2</span>
-                <h2 class="text-2xl font-bold text-slate-800">Climin 2段階認証</h2>
-                <p class="text-sm text-slate-500">セキュリティ保護のため、管理者デバイスへのコード送信を行ってください。</p>
+                <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full">Step 2 / 3: 第1段階認証</span>
+                <h2 class="text-2xl font-bold text-slate-800">1つ目のコード確認</h2>
+                <p class="text-sm text-slate-500">トピック1（climin-notice-login）に届いた4桁コードを入力してください。</p>
             </div>
 
-            <div id="authStep1" class="space-y-4">
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm text-slate-600 text-center">
-                    管理者デバイス（登録端末）に認証コードを送信します。
-                </div>
-                <button type="button" onclick="sendAuthCodeToNtfy()" id="sendCodeBtn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-medium hover:bg-indigo-700 transition shadow-sm">
-                    認証コードを送信する
-                </button>
-            </div>
-
-            <div id="authStep2" class="space-y-4 hidden">
-                <div class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-lg text-center font-medium">
-                    ✓ 管理者デバイスにコードを送信しました。通知をご確認ください。
+            <div class="space-y-4">
+                <div class="p-3 bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs rounded-lg text-center font-medium">
+                    ✓ トピック1へコードを送信しました。
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">4桁の確認コード</label>
-                    <input type="text" id="authCodeInput" maxlength="4" class="w-full text-center text-2xl tracking-widest px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold" placeholder="----">
+                    <label class="block text-sm font-medium mb-1">4桁の確認コード (1)</label>
+                    <input type="text" id="auth1CodeInput" maxlength="4" class="w-full text-center text-2xl tracking-widest px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold" placeholder="----">
                 </div>
-                <button type="button" onclick="verifyAuthCode()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-medium hover:bg-emerald-700 transition shadow-sm">
-                    認証してログイン
+                <button type="button" onclick="verifyAuth1()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-medium hover:bg-indigo-700 transition shadow-sm">
+                    次へ（2つ目の認証へ進む）
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 第2段階認証コード入力画面 -->
+    <div id="auth2View" class="fixed inset-0 bg-slate-900 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl space-y-6">
+            <div class="text-center space-y-2">
+                <span class="text-xs bg-emerald-100 text-emerald-700 font-bold px-3 py-1 rounded-full">Step 3 / 3: 第2段階認証</span>
+                <h2 class="text-2xl font-bold text-slate-800">2つ目のコード確認</h2>
+                <p class="text-sm text-slate-500">トピック2（notice-climin-loginin）に届いた4桁コードを入力してください。</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-lg text-center font-medium">
+                    ✓ トピック2へコードを送信しました。
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">4桁の確認コード (2)</label>
+                    <input type="text" id="auth2CodeInput" maxlength="4" class="w-full text-center text-2xl tracking-widest px-3 py-2 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-bold" placeholder="----">
+                </div>
+                <button type="button" onclick="verifyAuth2()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-medium hover:bg-emerald-700 transition shadow-sm">
+                    認証を完了してアプリに入る
                 </button>
             </div>
         </div>
@@ -78,8 +89,7 @@
                 <span id="currentViewTitle" class="text-xs bg-indigo-500 px-3 py-1 rounded-full">サービス選択ダッシュボード</span>
             </div>
             <div class="flex items-center space-x-4">
-                <span id="userIdDisplay" class="text-sm">🔐 認証済みユーザー</span>
-                <button onclick="openSettingsModal()" class="text-xs bg-indigo-700 px-3 py-1.5 rounded-lg hover:bg-indigo-800 transition">⚙️ アカウント設定</button>
+                <span id="userIdDisplay" class="text-sm">🔐 認証済み</span>
                 <button onclick="logout()" class="text-xs bg-rose-600 px-3 py-1.5 rounded-lg hover:bg-rose-700 transition">ログアウト</button>
             </div>
         </div>
@@ -87,25 +97,14 @@
 
     <!-- メインエリア -->
     <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-6">
-
-        <!-- view: 1. サービス選択ダッシュボード -->
         <div id="dashboardView" class="space-y-8">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-800">サービス・プロジェクト一覧</h2>
-                    <p class="text-sm text-slate-500 mt-1">管理するサービスを選択するか、新しいサービスを追加してください。</p>
-                </div>
-                <button onclick="openServiceModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition shadow-sm">
-                    ＋ 新規サービスを追加
-                </button>
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-slate-800">サービス・プロジェクト一覧</h2>
+                <button onclick="openServiceModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition shadow-sm">＋ 新規サービスを追加</button>
             </div>
-
-            <div id="serviceGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- 動的に挿入 -->
-            </div>
+            <div id="serviceGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </div>
 
-        <!-- view: 2. 選択したサービスの顧客管理・リスト画面 -->
         <div id="customerView" class="hidden grid grid-cols-1 md:grid-cols-3 gap-8">
             <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-fit">
                 <div class="flex justify-between items-center mb-4">
@@ -113,24 +112,24 @@
                         <span id="formServiceTag" class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded">サービス名</span>
                         <h2 class="text-lg font-semibold text-indigo-700 mt-1">新規顧客の登録</h2>
                     </div>
-                    <button onclick="goHome()" class="text-xs text-slate-400 hover:text-slate-600">&larr; サービス一覧に戻る</button>
+                    <button onclick="goHome()" class="text-xs text-slate-400 hover:text-slate-600">&larr; 一覧に戻る</button>
                 </div>
                 <form id="customerForm" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium mb-1">企業名 / 組織名</label>
-                        <input type="text" id="companyName" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="株式会社サンプル">
+                        <input type="text" id="companyName" required class="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="株式会社サンプル">
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1">ご担当者名</label>
-                        <input type="text" id="contactName" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="山田 太郎">
+                        <input type="text" id="contactName" required class="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="山田 太郎">
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1">メールアドレス</label>
-                        <input type="email" id="email" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="yamada@example.com">
+                        <input type="email" id="email" class="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="yamada@example.com">
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1">ステータス</label>
-                        <select id="status" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <select id="status" class="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
                             <option value="lead">見込み (Lead)</option>
                             <option value="negotiating" selected>商談中 (Negotiating)</option>
                             <option value="active">成約 (Active)</option>
@@ -143,13 +142,9 @@
 
             <section class="md:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <span id="tableBreadcrumb" class="text-xs text-slate-400">Climin &gt; サービス</span>
-                        <h2 id="tableTitle" class="text-lg font-semibold text-indigo-700">顧客一覧</h2>
-                    </div>
+                    <h2 id="tableTitle" class="text-lg font-semibold text-indigo-700">顧客一覧</h2>
                     <span id="customerCount" class="text-sm text-slate-500">0件</span>
                 </div>
-                
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
@@ -160,66 +155,39 @@
                                 <th class="py-3 px-4">操作</th>
                             </tr>
                         </thead>
-                        <tbody id="customerTableBody">
-                            <!-- 動的に挿入 -->
-                        </tbody>
+                        <tbody id="customerTableBody"></tbody>
                     </table>
                 </div>
             </section>
         </div>
-
     </main>
 
-    <!-- 新規サービス追加モーダル -->
+    <!-- サービス追加モーダル -->
     <div id="serviceModal" class="fixed inset-0 bg-slate-900/50 hidden flex items-center justify-center p-4 z-40">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
             <h3 class="text-lg font-bold text-slate-800">新しいサービスを追加</h3>
             <form id="serviceForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium mb-1">サービス名</label>
-                    <input type="text" id="newServiceName" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="例: Reach, Portal など">
+                    <input type="text" id="newServiceName" required class="w-full px-3 py-2 border rounded-lg outline-none" placeholder="例: Reach">
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">説明文</label>
-                    <textarea id="newServiceDesc" rows="3" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="サービスの概要を入力"></textarea>
+                    <textarea id="newServiceDesc" rows="3" class="w-full px-3 py-2 border rounded-lg outline-none" placeholder="概要"></textarea>
                 </div>
                 <div class="flex justify-end space-x-3 pt-2">
-                    <button type="button" onclick="closeServiceModal()" class="px-4 py-2 border rounded-lg text-sm text-slate-600 hover:bg-slate-50">キャンセル</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">追加する</button>
+                    <button type="button" onclick="closeServiceModal()" class="px-4 py-2 border rounded-lg text-sm text-slate-600">キャンセル</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium">追加する</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- アカウント設定（パスワード変更）モーダル -->
-    <div id="settingsModal" class="fixed inset-0 bg-slate-900/50 hidden flex items-center justify-center p-4 z-40">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
-            <h3 class="text-lg font-bold text-slate-800">アカウント設定 (パスワード変更)</h3>
-            <form id="passwordForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1">新しいパスワード</label>
-                    <input type="password" id="newPassword" required minlength="6" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="6文字以上で入力">
-                </div>
-                <div class="flex justify-end space-x-3 pt-2">
-                    <button type="button" onclick="closeSettingsModal()" class="px-4 py-2 border rounded-lg text-sm text-slate-600 hover:bg-slate-50">キャンセル</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">パスワードを更新</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- フッター -->
-    <footer class="bg-white border-t py-4 text-center text-xs text-slate-400">
-        &copy; 2026 Climin / Developed for Yamazaki Sora
-    </footer>
-
-    <!-- Firebase SDK & 埋め込み設定 -->
+    <!-- Firebase SDK & スクリプト -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, updatePassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         
-        // ★ Firebase設定を直接埋め込み（404エラーを完全に防止）
         const firebaseConfig = {
           apiKey: "AIzaSy... (あなたのAPIキー)",
           authDomain: "climin-bf45a.firebaseapp.com",
@@ -231,110 +199,83 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
 
-        const NTFY_TOPIC = "climin-notice-login-SSS465270";
-        let generatedCode = "";
+        const NTFY_TOPIC_1 = "climin-notice-login-SSS465270";
+        const NTFY_TOPIC_2 = "notice-climin-loginin-SSS465270";
+
+        let code1 = "";
+        let code2 = "";
+        let currentLoginUser = "";
         let services = [];
         let customers = [];
         let currentServiceId = null;
 
+        // 【Step 1】 ユーザー名入力 ➡️ 1つ目のトピックへコード送信
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const inputId = document.getElementById('loginId').value.trim();
-            const pw = document.getElementById('loginPw').value.trim();
+            currentLoginUser = document.getElementById('loginId').value.trim();
             const btn = document.getElementById('loginBtn');
 
-            const pseudoEmail = `${inputId}@climin.local`;
-
-            btn.textContent = "認証中...";
+            btn.textContent = "トピック1へ送信中...";
             btn.disabled = true;
 
-            try {
-                await signInWithEmailAndPassword(auth, pseudoEmail, pw);
-                document.getElementById('loginView').classList.add('hidden');
-                document.getElementById('authView').classList.remove('hidden');
-                document.getElementById('authView').classList.add('flex');
-            } catch (err) {
-                console.error("ログインエラー:", err);
-                alert("ログインに失敗しました。ユーザーIDまたはパスワードを確認してください。");
-            } finally {
-                btn.textContent = "ログインして2段階認証へ";
-                btn.disabled = false;
-            }
-        });
-
-        window.sendAuthCodeToNtfy = async function() {
-            generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
-            const btn = document.getElementById('sendCodeBtn');
-            btn.textContent = "送信中...";
-            btn.disabled = true;
+            code1 = Math.floor(1000 + Math.random() * 9000).toString();
+            const message1 = `【Climin 認証 1/2】\nユーザー: ${currentLoginUser}\n確認コード1: [ ${code1} ]`;
 
             try {
-                await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
-                    method: 'POST',
-                    body: `【Climin】ログイン確認コードは [ ${generatedCode} ] です。`
-                });
+                await fetch(`https://ntfy.sh/${NTFY_TOPIC_1}`, { method: 'POST', body: message1 });
             } catch (err) {
                 console.log("ntfy送信エラー:", err);
             }
 
-            document.getElementById('authStep1').classList.add('hidden');
-            document.getElementById('authStep2').classList.remove('hidden');
-        };
+            document.getElementById('loginView').classList.add('hidden');
+            document.getElementById('auth1View').classList.remove('hidden');
+            document.getElementById('auth1View').classList.add('flex');
+            btn.textContent = "1つ目のコードを送信する";
+            btn.disabled = false;
+        });
 
-        window.verifyAuthCode = async function() {
-            const inputVal = document.getElementById('authCodeInput').value.trim();
-            if (inputVal === generatedCode && generatedCode !== "") {
-                document.getElementById('authView').classList.add('hidden');
-                document.getElementById('authView').classList.remove('flex');
-                
-                const currentUser = auth.currentUser;
-                if (currentUser) {
-                    const rawId = currentUser.email.split('@')[0];
-                    document.getElementById('userIdDisplay').textContent = `🔐 ID: ${rawId}`;
+        // 【Step 2】 1つ目のコード検証 ➡️ 2つ目のトピックへ送信
+        window.verifyAuth1 = async function() {
+            const inputVal = document.getElementById('auth1CodeInput').value.trim();
+            if (inputVal === code1 && code1 !== "") {
+                code2 = Math.floor(1000 + Math.random() * 9000).toString();
+                const message2 = `【Climin 認証 2/2】\nユーザー: ${currentLoginUser}\n確認コード2: [ ${code2} ]`;
+
+                try {
+                    await fetch(`https://ntfy.sh/${NTFY_TOPIC_2}`, { method: 'POST', body: message2 });
+                } catch (err) {
+                    console.log("ntfy送信エラー:", err);
                 }
 
+                document.getElementById('auth1View').classList.add('hidden');
+                document.getElementById('auth1View').classList.remove('flex');
+                document.getElementById('auth2View').classList.remove('hidden');
+                document.getElementById('auth2View').classList.add('flex');
+            } else {
+                alert('1つ目の確認コードが正しくありません。');
+            }
+        };
+
+        // 【Step 3】 2つ目のコード検証 ➡️ 認証成功＆DBデータ取得
+        window.verifyAuth2 = async function() {
+            const inputVal = document.getElementById('auth2CodeInput').value.trim();
+            if (inputVal === code2 && code2 !== "") {
+                document.getElementById('auth2View').classList.add('hidden');
+                document.getElementById('auth2View').classList.remove('flex');
+                document.getElementById('userIdDisplay').textContent = `🔐 ユーザー: ${currentLoginUser}`;
+                
+                // 認証クリア後にデータを取得
                 await loadDataFromFirestore();
             } else {
-                alert('確認コードが正しくありません。端末に届いたコードをご確認ください。');
+                alert('2つ目の確認コードが正しくありません。');
             }
         };
 
-        window.logout = async function() {
+        window.logout = function() {
             if (!confirm("ログアウトしますか？")) return;
-            try {
-                await signOut(auth);
-                location.reload();
-            } catch (err) {
-                console.error("ログアウトエラー:", err);
-            }
+            location.reload();
         };
-
-        window.openSettingsModal = function() {
-            document.getElementById('settingsModal').classList.remove('hidden');
-        };
-        window.closeSettingsModal = function() {
-            document.getElementById('settingsModal').classList.add('hidden');
-            document.getElementById('passwordForm').reset();
-        };
-
-        document.getElementById('passwordForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const newPw = document.getElementById('newPassword').value.trim();
-            const user = auth.currentUser;
-
-            if (user) {
-                try {
-                    await updatePassword(user, newPw);
-                    alert("パスワードが正常に変更されました。");
-                    closeSettingsModal();
-                } catch (err) {
-                    console.error("パスワード変更エラー:", err);
-                    alert("パスワードの変更に失敗しました。再ログイン後に再度お試しください。");
-                }
-            }
-        });
 
         async function loadDataFromFirestore() {
             try {
@@ -344,7 +285,7 @@
                 if (services.length === 0) {
                     const defaultServices = [
                         { name: 'Reach', description: '組織向けポータル＆メッセージングプラットフォームの顧客管理。', badge: 'Re' },
-                        { name: 'Portal', description: '内部ツールおよびシステム全体の統合管理用スペース。', badge: 'Po' }
+                        { name: 'Portal', description: '内部ツール管理用スペース。', badge: 'Po' }
                     ];
                     for (let s of defaultServices) {
                         const docRef = await addDoc(collection(db, "services"), s);
@@ -363,14 +304,13 @@
         }
 
         async function sendNtfyAlert(title, message) {
+            const bodyText = `${title}\n\n${message}`;
             try {
-                await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
-                    method: 'POST',
-                    body: `${title}\n\n${message}`
-                });
-            } catch (err) {
-                console.log("ntfy通知スキップ");
-            }
+                await Promise.all([
+                    fetch(`https://ntfy.sh/${NTFY_TOPIC_1}`, { method: 'POST', body: bodyText }),
+                    fetch(`https://ntfy.sh/${NTFY_TOPIC_2}`, { method: 'POST', body: bodyText })
+                ]);
+            } catch (err) {}
         }
 
         window.renderServices = function() {
@@ -387,11 +327,9 @@
                                 <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">顧客 ${count}件</span>
                             </div>
                             <h3 class="text-lg font-semibold text-slate-800 group-hover:text-indigo-600 transition">${escapeHtml(s.name)}</h3>
-                            <p class="text-sm text-slate-500 mt-2">${escapeHtml(s.description || '説明なし')}</p>
+                            <p class="text-sm text-slate-500 mt-2">${escapeHtml(s.description || '')}</p>
                         </div>
-                        <div class="mt-6 flex items-center text-sm font-medium text-indigo-600">
-                            顧客リストを開く &rarr;
-                        </div>
+                        <div class="mt-6 flex items-center text-sm font-medium text-indigo-600">顧客リストを開く &rarr;</div>
                     </div>
                 `;
             }).join('');
@@ -400,14 +338,11 @@
         window.selectService = function(serviceId) {
             currentServiceId = serviceId;
             const service = services.find(s => s.id === serviceId);
-            
             document.getElementById('dashboardView').classList.add('hidden');
             document.getElementById('customerView').classList.remove('hidden');
             document.getElementById('currentViewTitle').textContent = `${service.name} (顧客管理)`;
             document.getElementById('formServiceTag').textContent = service.name;
-            document.getElementById('tableBreadcrumb').textContent = `Climin > ${service.name}`;
             document.getElementById('tableTitle').textContent = `${service.name} の顧客一覧`;
-            
             renderTable();
         };
 
@@ -425,7 +360,7 @@
             document.getElementById('customerCount').textContent = `${serviceCustomers.length}件`;
             
             if (serviceCustomers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400">このサービスのデータはまだありません</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400">データはまだありません</td></tr>`;
                 return;
             }
 
@@ -433,33 +368,20 @@
                 <tr class="border-b hover:bg-slate-50 transition">
                     <td class="py-3 px-4 font-medium">${escapeHtml(c.companyName)}</td>
                     <td class="py-3 px-4">${escapeHtml(c.contactName)}</td>
-                    <td class="py-3 px-4">
-                        <span class="px-2 py-1 text-xs rounded-full ${getStatusBadge(c.status)}">${getStatusLabel(c.status)}</span>
-                    </td>
-                    <td class="py-3 px-4">
-                        <button onclick="deleteCustomer('${c.id}')" class="text-rose-500 hover:text-rose-700 text-sm">削除</button>
-                    </td>
+                    <td class="py-3 px-4"><span class="px-2 py-1 text-xs rounded-full ${getStatusBadge(c.status)}">${getStatusLabel(c.status)}</span></td>
+                    <td class="py-3 px-4"><button onclick="deleteCustomer('${c.id}')" class="text-rose-500 hover:text-rose-700 text-sm">削除</button></td>
                 </tr>
             `).join('');
         }
 
         function getStatusLabel(status) {
-            const labels = { lead: '見込み', negotiating: '商談中', active: '成約', inactive: '保留' };
-            return labels[status] || status;
+            return { lead: '見込み', negotiating: '商談中', active: '成約', inactive: '保留' }[status] || status;
         }
-
         function getStatusBadge(status) {
-            const badges = {
-                lead: 'bg-amber-100 text-amber-800',
-                negotiating: 'bg-blue-100 text-blue-800',
-                active: 'bg-emerald-100 text-emerald-800',
-                inactive: 'bg-slate-100 text-slate-800'
-            };
-            return badges[status] || 'bg-slate-100 text-slate-800';
+            return { lead: 'bg-amber-100 text-amber-800', negotiating: 'bg-blue-100 text-blue-800', active: 'bg-emerald-100 text-emerald-800', inactive: 'bg-slate-100 text-slate-800' }[status] || 'bg-slate-100 text-slate-800';
         }
-
         function escapeHtml(str) {
-            return (str || '').replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+            return (str || '').replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t));
         }
 
         document.getElementById('customerForm').addEventListener('submit', async (e) => {
@@ -470,52 +392,32 @@
             const email = document.getElementById('email').value;
             const status = document.getElementById('status').value;
 
-            const newCustomerData = {
-                serviceId: currentServiceId,
-                companyName,
-                contactName,
-                email,
-                status,
-                createdAt: Date.now()
-            };
+            const newCustomerData = { serviceId: currentServiceId, companyName, contactName, email, status, createdAt: Date.now() };
 
             try {
                 const docRef = await addDoc(collection(db, "customers"), newCustomerData);
                 customers.unshift({ id: docRef.id, ...newCustomerData });
                 renderTable();
                 e.target.reset();
-
-                await sendNtfyAlert(
-                    `【Climin】新規顧客登録 (${service.name})`,
-                    `企業名: ${companyName}\nご担当者: ${contactName}\nステータス: ${getStatusLabel(status)}`
-                );
+                await sendNtfyAlert(`【Climin】新規顧客登録 (${service.name})`, `企業: ${companyName}\n担当: ${contactName}`);
             } catch (err) {
-                console.error("顧客追加エラー:", err);
                 alert("顧客の保存に失敗しました。");
             }
         });
 
         window.deleteCustomer = async function(id) {
-            if (!confirm("本当にこの顧客データを削除しますか？")) return;
+            if (!confirm("本当に削除しますか？")) return;
             try {
                 await deleteDoc(doc(db, "customers", id));
                 customers = customers.filter(c => c.id !== id);
                 renderTable();
             } catch (err) {
-                console.error("顧客削除エラー:", err);
                 alert("削除に失敗しました。");
             }
         };
 
-        window.openServiceModal = function() {
-            document.getElementById('serviceModal').classList.add('flex');
-            document.getElementById('serviceModal').classList.remove('hidden');
-        };
-        window.closeServiceModal = function() {
-            document.getElementById('serviceModal').classList.remove('flex');
-            document.getElementById('serviceModal').classList.add('hidden');
-            document.getElementById('serviceForm').reset();
-        };
+        window.openServiceModal = function() { document.getElementById('serviceModal').classList.remove('hidden'); document.getElementById('serviceModal').classList.add('flex'); };
+        window.closeServiceModal = function() { document.getElementById('serviceModal').classList.add('hidden'); document.getElementById('serviceModal').classList.remove('flex'); };
 
         document.getElementById('serviceForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -523,15 +425,12 @@
             const desc = document.getElementById('newServiceDesc').value.trim();
             const badge = name.slice(0, 2).toUpperCase();
 
-            const newServiceData = { name, description: desc, badge };
-
             try {
-                const docRef = await addDoc(collection(db, "services"), newServiceData);
-                services.push({ id: docRef.id, ...newServiceData });
+                const docRef = await addDoc(collection(db, "services"), { name, description: desc, badge });
+                services.push({ id: docRef.id, name, description: desc, badge });
                 closeServiceModal();
                 renderServices();
             } catch (err) {
-                console.error("サービス追加エラー:", err);
                 alert("サービスの保存に失敗しました。");
             }
         });

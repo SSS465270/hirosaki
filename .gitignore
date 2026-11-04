@@ -1,0 +1,3 @@
+# Gitの管理から除外するファイル
+config.js
+.DS_Store
