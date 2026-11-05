@@ -39,15 +39,15 @@
             <div class="text-center space-y-2">
                 <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full">Step 2 / 3: 第1段階認証</span>
                 <h2 class="text-2xl font-bold text-slate-800">1つ目のコード確認</h2>
-                <p class="text-sm text-slate-500">トピック1（climin-notice-login）に届いた4桁コードを入力してください。</p>
+                <p class="text-sm text-slate-500">コードを入力してください。</p>
             </div>
 
             <div class="space-y-4">
                 <div class="p-3 bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs rounded-lg text-center font-medium">
-                    ✓ トピック1へコードを送信しました。
+                   コードを送信しました。
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">4桁の確認コード (1)</label>
+                    <label class="block text-sm font-medium mb-1">確認コード (1)</label>
                     <input type="text" id="auth1CodeInput" maxlength="4" class="w-full text-center text-2xl tracking-widest px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold" placeholder="----">
                 </div>
                 <button type="button" onclick="verifyAuth1()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-medium hover:bg-indigo-700 transition shadow-sm">
@@ -63,15 +63,15 @@
             <div class="text-center space-y-2">
                 <span class="text-xs bg-emerald-100 text-emerald-700 font-bold px-3 py-1 rounded-full">Step 3 / 3: 第2段階認証</span>
                 <h2 class="text-2xl font-bold text-slate-800">2つ目のコード確認</h2>
-                <p class="text-sm text-slate-500">トピック2（notice-climin-loginin）に届いた4桁コードを入力してください。</p>
+                <p class="text-sm text-slate-500">コードを入力してください。</p>
             </div>
 
             <div class="space-y-4">
                 <div class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-lg text-center font-medium">
-                    ✓ トピック2へコードを送信しました。
+                    ✓ 送信しました。
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">4桁の確認コード (2)</label>
+                    <label class="block text-sm font-medium mb-1">確認コード (2)</label>
                     <input type="text" id="auth2CodeInput" maxlength="4" class="w-full text-center text-2xl tracking-widest px-3 py-2 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-bold" placeholder="----">
                 </div>
                 <button type="button" onclick="verifyAuth2()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-medium hover:bg-emerald-700 transition shadow-sm">
@@ -187,7 +187,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         
         const firebaseConfig = {
           apiKey: "AIzaSy... (あなたのAPIキー)",
@@ -200,7 +199,6 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
 
         const NTFY_TOPIC_1 = "climin-notice-login-SSS465270";
         const NTFY_TOPIC_2 = "notice-climin-loginin-SSS465270";
@@ -231,7 +229,7 @@
             currentLoginUser = inputId;
             const btn = document.getElementById('loginBtn');
 
-            btn.textContent = "トピック1へ送信中...";
+            btn.textContent = "送信中...";
             btn.disabled = true;
 
             code1 = Math.floor(1000 + Math.random() * 9000).toString();
@@ -272,24 +270,16 @@
             }
         };
 
-        // 【Step 3】 2つ目のコード検証 ➡️ 匿名認証の実行 ＆ 認証成功＆DBデータ取得
+        // 【Step 3】 2つ目のコード検証 ➡️ 認証成功＆DBデータ取得
         window.verifyAuth2 = async function() {
             const inputVal = document.getElementById('auth2CodeInput').value.trim();
             if (inputVal === code2 && code2 !== "") {
-                try {
-                    // 裏でFirebaseの匿名認証を実行してセッションを確立
-                    await signInAnonymously(auth);
-
-                    document.getElementById('auth2View').classList.add('hidden');
-                    document.getElementById('auth2View').classList.remove('flex');
-                    document.getElementById('userIdDisplay').textContent = `🔐 ユーザー: ${currentLoginUser}`;
-                    
-                    // 認証クリア後にデータを取得
-                    await loadDataFromFirestore();
-                } catch (err) {
-                    console.error("匿名認証エラー:", err);
-                    alert("Firebase認証に失敗しました。");
-                }
+                document.getElementById('auth2View').classList.add('hidden');
+                document.getElementById('auth2View').classList.remove('flex');
+                document.getElementById('userIdDisplay').textContent = `🔐 ユーザー: ${currentLoginUser}`;
+                
+                // 認証クリア後にデータを取得
+                await loadDataFromFirestore();
             } else {
                 alert('2つ目の確認コードが正しくありません。');
             }
