@@ -9,7 +9,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <!-- 1. ログイン画面（Step 1: ID検証 ＆ 1つ目のntfy送信） -->
+    <!-- 1. ログイン画面 -->
     <div id="loginView" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl space-y-6">
             <div class="text-center space-y-2">
@@ -44,7 +44,7 @@
 
             <div class="space-y-4">
                 <div class="p-3 bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs rounded-lg text-center font-medium">
-                   コードを送信しました。
+                    ✓ コードを送信しました。
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">確認コード (1)</label>
@@ -68,7 +68,7 @@
 
             <div class="space-y-4">
                 <div class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-lg text-center font-medium">
-                    ✓ 送信しました。
+                    ✓ コードを送信しました。
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">確認コード (2)</label>
@@ -203,7 +203,6 @@
         const NTFY_TOPIC_1 = "climin-notice-login-SSS465270";
         const NTFY_TOPIC_2 = "notice-climin-loginin-SSS465270";
 
-        // 【許可する管理者IDリスト】
         const ALLOWED_IDS = ["sora", "admin", "yamada"];
 
         let code1 = "";
@@ -213,7 +212,6 @@
         let customers = [];
         let currentServiceId = null;
 
-        // 【Step 1】 ユーザー名入力 ➡️ ホワイトリスト検証 ➡️ 1つ目のトピックへコード送信
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const inputId = document.getElementById('loginId').value.trim();
@@ -248,7 +246,6 @@
             btn.disabled = false;
         });
 
-        // 【Step 2】 1つ目のコード検証 ➡️ 2つ目のトピックへ送信
         window.verifyAuth1 = async function() {
             const inputVal = document.getElementById('auth1CodeInput').value.trim();
             if (inputVal === code1 && code1 !== "") {
@@ -270,7 +267,6 @@
             }
         };
 
-        // 【Step 3】 2つ目のコード検証 ➡️ 認証成功＆DBデータ取得
         window.verifyAuth2 = async function() {
             const inputVal = document.getElementById('auth2CodeInput').value.trim();
             if (inputVal === code2 && code2 !== "") {
@@ -278,7 +274,6 @@
                 document.getElementById('auth2View').classList.remove('flex');
                 document.getElementById('userIdDisplay').textContent = `🔐 ユーザー: ${currentLoginUser}`;
                 
-                // 認証クリア後にデータを取得
                 await loadDataFromFirestore();
             } else {
                 alert('2つ目の確認コードが正しくありません。');
@@ -331,8 +326,8 @@
             grid.innerHTML = services.map(s => {
                 const count = customers.filter(c => c.serviceId === s.id).length;
                 return `
-                    <div onclick="selectService('${s.id}')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-indigo-500 hover:shadow-md transition cursor-pointer group flex flex-col justify-between">
-                        <div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-indigo-500 hover:shadow-md transition flex flex-col justify-between group">
+                        <div onclick="selectService('${s.id}')" class="cursor-pointer">
                             <div class="flex justify-between items-start mb-4">
                                 <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center font-bold text-lg group-hover:bg-indigo-600 group-hover:text-white transition">
                                     ${escapeHtml(s.badge || 'Se')}
@@ -342,10 +337,28 @@
                             <h3 class="text-lg font-semibold text-slate-800 group-hover:text-indigo-600 transition">${escapeHtml(s.name)}</h3>
                             <p class="text-sm text-slate-500 mt-2">${escapeHtml(s.description || '')}</p>
                         </div>
-                        <div class="mt-6 flex items-center text-sm font-medium text-indigo-600">顧客リストを開く &rarr;</div>
+                        <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center">
+                            <span onclick="selectService('${s.id}')" class="text-sm font-medium text-indigo-600 cursor-pointer hover:underline">顧客リストを開く &rarr;</span>
+                            <button onclick="deleteService(event, '${s.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-medium px-2 py-1 rounded hover:bg-rose-50 transition">サービスを削除</button>
+                        </div>
                     </div>
                 `;
             }).join('');
+        };
+
+        // サービス削除関数
+        window.deleteService = async function(event, serviceId) {
+            event.stopPropagation(); // カード全体のクリックイベントが発火するのを防止
+            if (!confirm("このサービスを削除しますか？\n（※紐づく顧客データも必要に応じて整理してください）")) return;
+
+            try {
+                await deleteDoc(doc(db, "services", serviceId));
+                services = services.filter(s => s.id !== serviceId);
+                renderServices();
+            } catch (err) {
+                console.error("サービス削除エラー:", err);
+                alert("サービスの削除に失敗しました。");
+            }
         };
 
         window.selectService = function(serviceId) {
